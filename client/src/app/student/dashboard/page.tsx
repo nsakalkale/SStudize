@@ -12,19 +12,19 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser');
-    if (!storedUser) {
-      router.push('/');
+    const userStr = localStorage.getItem("user");
+    if (!userStr) {
+      router.push("/login");
       return;
     }
-    
-    const parsedUser: User = JSON.parse(storedUser);
-    if (parsedUser.role !== 'student') {
-      router.push('/');
-      return;
-    }
-    
+
+    const parsedUser = JSON.parse(userStr);
     setUser(parsedUser);
+
+    if (parsedUser.role !== "student") {
+      router.push("/login");
+      return;
+    }
     
     const storedTests = localStorage.getItem('tests');
     if (storedTests) {
@@ -55,6 +55,10 @@ export default function StudentDashboard() {
   
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading dashboard...</div>;
+  }
+  
+  if (!user) {
+    return <div>Loading...</div>;
   }
   
   return (

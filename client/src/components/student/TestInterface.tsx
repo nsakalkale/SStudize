@@ -1,11 +1,13 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { useCallback } from "react";
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import type { QuestionType, TestConfig, TestSession } from "@/types"
 import { formatTime, generateSessionId, getQuestionStatus } from "@/lib/utils"
 import { questions } from "@/data/mockData"
+import Image from 'next/image'
 
 interface TestInterfaceProps {
   test: TestConfig
@@ -26,23 +28,86 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
   const questionStartTimeRef = useRef<number>(Date.now())
   const visibilityWarningCount = useRef<number>(0)
 
-  // Initialize or restore session
+  const submitTest = useCallback(() => {
+    if (!session) return
+
+    const results = {
+      testId: test.id,
+      userId: userId,
+      score: 0,
+      totalQuestions: test.questionIds.length,
+      correctAnswers: 0,
+      incorrectAnswers: 0,
+      unattempted: 0,
+      markedForReview: 0,
+      timeTaken: test.duration - session.remainingTime,
+      submittedAt: Date.now(),
+      questionStats: [] as { questionId: number; timeSpent: number; isCorrect: boolean; attempted: boolean }[],
+    }
+
+    Object.values(session.answers).forEach((answer) => {
+      const question = questions.find((q) => q.id === answer.questionId)
+      if (!question) return
+
+      const isAttempted = answer.selectedOption !== null
+      const isCorrect = isAttempted && answer.selectedOption === question.correctAnswer
+
+      if (isAttempted) {
+        if (isCorrect) {
+          results.correctAnswers += 1
+          results.score += 4
+        } else {
+          results.incorrectAnswers += 1
+          results.score -= 1
+        }
+      } else {
+        results.unattempted += 1
+      }
+
+      if (answer.markedForReview) {
+        results.markedForReview += 1
+      }
+
+      results.questionStats.push({
+        questionId: answer.questionId,
+        timeSpent: answer.timeSpent,
+        isCorrect: isCorrect,
+        attempted: isAttempted,
+      })
+    })
+
+    localStorage.setItem(`test_result_${test.id}_${userId}`, JSON.stringify(results))
+
+    setSession((prev) => {
+      if (!prev) return prev
+
+      const updatedSession = {
+        ...prev,
+        completed: true,
+        endTime: Date.now(),
+      }
+
+      localStorage.setItem(`test_session_${test.id}_${userId}`, JSON.stringify(updatedSession))
+
+      return updatedSession
+    })
+
+    router.push(`/student/results/${test.id}`)
+  }, [session, test.id, test.duration, test.questionIds.length, userId, router])
+
   useEffect(() => {
     const storedSession = localStorage.getItem(`test_session_${test.id}_${userId}`)
 
     if (storedSession) {
-      // Restore existing session
       const parsedSession: TestSession = JSON.parse(storedSession)
       setSession(parsedSession)
 
-      // Load current question
       const question = questions.find((q) => q.id === parsedSession.currentQuestionId)
       if (question) {
         setCurrentQuestion(question)
         setCurrentSubject(question.subject)
       }
     } else {
-      // Create new session
       const newSession: TestSession = {
         id: generateSessionId(),
         userId,
@@ -55,7 +120,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
         completed: false,
       }
 
-      // Initialize answers
       test.questionIds.forEach((qId) => {
         newSession.answers[qId] = {
           questionId: qId,
@@ -68,7 +132,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
 
       setSession(newSession)
 
-      // Load first question
       const firstQuestion = questions.find((q) => q.id === test.questionIds[0])
       if (firstQuestion) {
         setCurrentQuestion(firstQuestion)
@@ -79,7 +142,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     setLoading(false)
   }, [test, userId])
 
-  // Set up timer
   useEffect(() => {
     if (!session) return
 
@@ -89,7 +151,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
 
         const newRemainingTime = prev.remainingTime - 1
 
-        // Auto-submit when time is up
         if (newRemainingTime <= 0) {
           clearInterval(timerRef.current!)
           submitTest()
@@ -101,7 +162,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
           remainingTime: newRemainingTime,
         }
 
-        // Save session to localStorage
         localStorage.setItem(`test_session_${test.id}_${userId}`, JSON.stringify(updatedSession))
 
         return updatedSession
@@ -111,15 +171,13 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [session, test.id, userId])
+  }, [session, test.id, userId, submitTest])
 
-  // Track time spent on current question
   useEffect(() => {
     if (!session || !currentQuestion) return
 
     questionStartTimeRef.current = Date.now()
 
-    // Update time spent on question every second
     questionTimerRef.current = setInterval(() => {
       const timeSpent = Math.floor((Date.now() - questionStartTimeRef.current) / 1000)
 
@@ -138,7 +196,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
           answers: updatedAnswers,
         }
 
-        // Save session to localStorage every 5 seconds
         if (timeSpent % 5 === 0) {
           localStorage.setItem(`test_session_${test.id}_${userId}`, JSON.stringify(updatedSession))
         }
@@ -150,21 +207,18 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     return () => {
       if (questionTimerRef.current) clearInterval(questionTimerRef.current)
     }
-  }, [currentQuestion, session, test.id, userId])
+  }, [currentQuestion, session, test.id, userId, submitTest])
 
-  // Handle tab visibility change (anti-cheating)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
         visibilityWarningCount.current += 1
         setShowWarning(true)
 
-        // Auto-submit after 3 warnings
         if (visibilityWarningCount.current >= 3) {
           submitTest()
         }
 
-        // Update tab switch count
         setSession((prev) => {
           if (!prev) return prev
 
@@ -185,9 +239,8 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange)
     }
-  }, [test.id, userId])
+  }, [test.id, userId, submitTest])
 
-  // Disable right-click
   useEffect(() => {
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault()
@@ -195,7 +248,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Disable Ctrl+C, Ctrl+V, Ctrl+X
       if ((e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "v" || e.key === "x")) {
         e.preventDefault()
       }
@@ -210,7 +262,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     }
   }, [])
 
-  // Toggle fullscreen
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().then(() => {
@@ -225,7 +276,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     }
   }
 
-  // Handle answer selection
   const handleOptionSelect = (optionIndex: number) => {
     if (!session || !currentQuestion) return
 
@@ -250,7 +300,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     })
   }
 
-  // Navigate to next question
   const goToNextQuestion = () => {
     if (!session || !currentQuestion) return
 
@@ -261,7 +310,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     }
   }
 
-  // Navigate to previous question
   const goToPrevQuestion = () => {
     if (!session || !currentQuestion) return
 
@@ -272,7 +320,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     }
   }
 
-  // Navigate to specific question
   const navigateToQuestion = (questionId: number) => {
     if (!session) return
 
@@ -296,7 +343,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     setCurrentSubject(question.subject)
   }
 
-  // Mark question for review
   const markForReview = () => {
     if (!session || !currentQuestion) return
 
@@ -323,7 +369,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     goToNextQuestion()
   }
 
-  // Clear response
   const clearResponse = () => {
     if (!session || !currentQuestion) return
 
@@ -347,84 +392,9 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
     })
   }
 
-  // Submit test
-  const submitTest = () => {
-    if (!session) return
-
-    // Calculate results
-    const results = {
-      testId: test.id,
-      userId,
-      score: 0,
-      totalQuestions: test.questionIds.length,
-      correctAnswers: 0,
-      incorrectAnswers: 0,
-      unattempted: 0,
-      markedForReview: 0,
-      timeTaken: test.duration - session.remainingTime,
-      submittedAt: Date.now(),
-      questionStats: [] as { questionId: number; timeSpent: number; isCorrect: boolean; attempted: boolean }[],
-    }
-
-    // Process each question
-    Object.values(session.answers).forEach((answer) => {
-      const question = questions.find((q) => q.id === answer.questionId)
-      if (!question) return
-
-      const isAttempted = answer.selectedOption !== null
-      const isCorrect = isAttempted && answer.selectedOption === question.correctAnswer
-
-      if (isAttempted) {
-        if (isCorrect) {
-          results.correctAnswers += 1
-          results.score += 4 // +4 for correct answer
-        } else {
-          results.incorrectAnswers += 1
-          results.score -= 1 // -1 for incorrect answer
-        }
-      } else {
-        results.unattempted += 1
-      }
-
-      if (answer.markedForReview) {
-        results.markedForReview += 1
-      }
-
-      results.questionStats.push({
-        questionId: answer.questionId,
-        timeSpent: answer.timeSpent,
-        isCorrect: isCorrect,
-        attempted: isAttempted,
-      })
-    })
-
-    // Save results to localStorage
-    localStorage.setItem(`test_result_${test.id}_${userId}`, JSON.stringify(results))
-
-    // Mark session as completed
-    setSession((prev) => {
-      if (!prev) return prev
-
-      const updatedSession = {
-        ...prev,
-        completed: true,
-        endTime: Date.now(),
-      }
-
-      localStorage.setItem(`test_session_${test.id}_${userId}`, JSON.stringify(updatedSession))
-
-      return updatedSession
-    })
-
-    // Navigate to results page
-    router.push(`/student/results/${test.id}`)
-  }
-
-  // Filter questions by subject
   const filterQuestionsBySubject = (subject: string) => {
     setCurrentSubject(subject)
 
-    // Navigate to the first question of the selected subject
     const firstQuestionOfSubject = questions.find((q) => q.subject === subject && test.questionIds.includes(q.id))
     if (firstQuestionOfSubject) {
       navigateToQuestion(firstQuestionOfSubject.id)
@@ -437,7 +407,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Warning Modal */}
       {showWarning && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md">
@@ -452,10 +421,15 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
         </div>
       )}
 
-      {/* Header */}
       <header className="bg-blue-900 text-white p-4 flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <img src="/placeholder.svg?height=50&width=50" alt="Logo" className="h-12" />
+          <Image
+            src="/placeholder.svg?height=50&width=50"
+            alt="Logo"
+            width={50}
+            height={50}
+            layout="responsive"
+          />
           <div>
             <h1 className="text-xl font-bold">National Testing Agency</h1>
             <p className="text-sm">Ministry of Education, Government of India</p>
@@ -468,7 +442,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
         </div>
       </header>
 
-      {/* Candidate Info */}
       <div className="bg-gray-100 p-4 border-b flex justify-between items-center">
         <div className="flex items-center space-x-4">
           <div className="bg-gray-300 p-2 rounded-md">
@@ -505,9 +478,7 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex flex-1 h-[calc(100vh-180px)]">
-        {/* Question Area */}
         <div className="w-3/4 p-4 overflow-y-auto">
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-4">
@@ -548,7 +519,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
               ))}
             </div>
 
-            {/* Navigation Buttons */}
             <div className="flex justify-between mt-8">
               <div className="space-x-2">
                 <Button
@@ -606,7 +576,6 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
           </div>
         </div>
 
-        {/* Question Palette */}
         <div className="w-1/4 bg-white border-l p-4 overflow-y-auto">
           <div className="mb-4">
             <h3 className="text-lg font-semibold mb-2">Question Palette</h3>
@@ -637,7 +606,7 @@ export default function TestInterface({ test, userId }: TestInterfaceProps) {
           <div className="grid grid-cols-5 gap-2">
             {test.questionIds.map((qId, index) => {
               const status = getQuestionStatus(qId, session.answers)
-              let bgColor = "bg-gray-300" // not visited
+              let bgColor = "bg-gray-300"
 
               if (status === "not-answered") bgColor = "bg-red-500"
               if (status === "answered") bgColor = "bg-green-500"

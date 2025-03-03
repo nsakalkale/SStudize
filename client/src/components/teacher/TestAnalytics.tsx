@@ -46,7 +46,6 @@ export default function TestAnalytics({ testId }: TestAnalyticsProps) {
     return <div className="flex items-center justify-center h-screen">Test not found</div>
   }
 
-  // Calculate overall stats
   const totalStudents = test.assignedTo.length
   const attemptedCount = results.length
   const averageScore =
@@ -62,8 +61,6 @@ export default function TestAnalytics({ testId }: TestAnalyticsProps) {
           ) / results.length,
         )
       : 0
-
-  // Calculate question difficulty
   const questionDifficulty = test.questionIds
     .map((qId) => {
       const questionResults = results.filter((r) => r.questionStats.some((s) => s.questionId === qId && s.attempted))
@@ -82,18 +79,14 @@ export default function TestAnalytics({ testId }: TestAnalyticsProps) {
     })
     .sort((a, b) => a.correctRate - b.correctRate)
 
-  // Export results as CSV
   const exportCSV = () => {
-    // Create CSV header
     let csv = "Student ID,Student Name,Score,Correct Answers,Incorrect Answers,Unattempted,Time Taken,Submission Time\n"
 
-    // Add data rows
     results.forEach((result) => {
       const student = users.find((u) => u.id === result.userId)
       csv += `${result.userId},${student?.name || "Unknown"},${result.score},${result.correctAnswers},${result.incorrectAnswers},${result.unattempted},${formatTime(result.timeTaken)},${new Date(result.submittedAt).toLocaleString()}\n`
     })
 
-    // Create download link
     const blob = new Blob([csv], { type: "text/csv" })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement("a")
@@ -238,12 +231,10 @@ export default function TestAnalytics({ testId }: TestAnalyticsProps) {
 
                 <div>
                   {test.subjects.map((subject) => {
-                    // Filter questions by subject
                     const subjectQuestions = questions.filter(
                       (q) => q.subject === subject && test.questionIds.includes(q.id),
                     )
 
-                    // Calculate subject stats across all students
                     let totalCorrect = 0
                     let totalIncorrect = 0
                     let totalAttempted = 0

@@ -4,36 +4,30 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import TestCreator from "@/components/teacher/TestCreator"
-import TestAnalytics from "@/components/teacher/TestAnalytics"
-import type { TestConfig, User } from "@/types"
+import type { TestConfig } from "@/types"
 
 export default function TeacherDashboard() {
   const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
+  const [activeView, setActiveView] = useState<"tests" | "create">("tests")
   const [tests, setTests] = useState<TestConfig[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeView, setActiveView] = useState<"tests" | "creator">("tests")
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser')
+    const storedUser = localStorage.getItem("user")
     if (!storedUser) {
-      router.push('/')
+      router.push("/")
       return
     }
 
-    const parsedUser: User = JSON.parse(storedUser)
-    if (parsedUser.role !== 'teacher') {
-      router.push('/')
+    const parsedUser = JSON.parse(storedUser)
+    if (parsedUser.role !== "teacher") {
+      router.push("/")
       return
     }
 
-    setUser(parsedUser)
-
-    const storedTests = localStorage.getItem('tests')
+    const storedTests = localStorage.getItem("tests")
     if (storedTests) {
-      const allTests: TestConfig[] = JSON.parse(storedTests)
-      const teacherTests = allTests.filter(test => test.scheduledBy === parsedUser.id)
-      setTests(teacherTests)
+      setTests(JSON.parse(storedTests))
     }
 
     setLoading(false)
@@ -70,9 +64,9 @@ export default function TeacherDashboard() {
           <h2 className="text-2xl font-bold text-black">Teacher Dashboard</h2>
           <div className="flex gap-4">
             <Button
-              onClick={() => setActiveView("creator")}
+              onClick={() => setActiveView("create")}
               className={`flex items-center gap-2 ${
-                activeView === "creator"
+                activeView === "create"
                   ? "bg-blue-600 text-white hover:bg-blue-700"
                   : "bg-blue-50 text-blue-600 hover:bg-blue-100 border-2 border-dashed border-blue-200"
               }`}
@@ -88,7 +82,7 @@ export default function TeacherDashboard() {
         {activeView === "tests" ? (
           <>
             <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-blue-200 hover:border-blue-400 transition-colors cursor-pointer" onClick={() => setActiveView("creator")}>
+              <div className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-blue-200 hover:border-blue-400 transition-colors cursor-pointer" onClick={() => setActiveView("create")}>
                 <div className="text-center">
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
