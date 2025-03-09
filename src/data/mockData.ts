@@ -1,19 +1,19 @@
-import type { QuestionType, TestConfig, User } from "@/types"
+import type { QuestionType, TestConfig, User } from "@/types";
 
-export const SUBJECTS = ["Physics", "Chemistry", "Mathematics"] as const
+export const SUBJECTS = ["Physics", "Chemistry", "Mathematics"] as const;
 
 export const users: User[] = [
   {
     id: "student1",
     name: "John Doe",
     email: "john@example.com",
-    role: "student"
+    role: "student",
   },
   {
     id: "student1",
     name: "Alina",
     email: "alina@example.com",
-    role: "student"
+    role: "student",
   },
   {
     id: "teacher1",
@@ -21,7 +21,7 @@ export const users: User[] = [
     email: "smith@example.com",
     role: "teacher",
   },
-]
+];
 
 export const questions: QuestionType[] = [
   {
@@ -30,7 +30,8 @@ export const questions: QuestionType[] = [
     text: "A person standing on an open ground hears the sound of a aeroplane coming from north at an angle 60° with ground level. But he finds the aeroplane right vertically above his position. If v is the speed of sound, speed of the plane is:",
     options: ["v", "v/2", "√3v/2", "2v"],
     correctAnswer: 2,
-    explanation: "Using the relation between angle of approach and velocity vectors.",
+    explanation:
+      "Using the relation between angle of approach and velocity vectors.",
   },
   {
     id: 2,
@@ -46,7 +47,8 @@ export const questions: QuestionType[] = [
     text: "Two identical charged particles are placed at a distance d apart. If the force between them is F, what will be the force if the distance is doubled?",
     options: ["F/4", "F/2", "2F", "4F"],
     correctAnswer: 0,
-    explanation: "According to Coulomb's law, F ∝ 1/r². So if r becomes 2r, F becomes F/4.",
+    explanation:
+      "According to Coulomb's law, F ∝ 1/r². So if r becomes 2r, F becomes F/4.",
   },
   {
     id: 4,
@@ -54,7 +56,8 @@ export const questions: QuestionType[] = [
     text: "What is the equivalent resistance between points A and B in a circuit with two 2Ω resistors in parallel?",
     options: ["1Ω", "2Ω", "4Ω", "8Ω"],
     correctAnswer: 0,
-    explanation: "For parallel resistors, 1/R = 1/R1 + 1/R2. Here, 1/R = 1/2 + 1/2 = 1, so R = 1Ω",
+    explanation:
+      "For parallel resistors, 1/R = 1/R1 + 1/R2. Here, 1/R = 1/2 + 1/2 = 1, so R = 1Ω",
   },
   {
     id: 5,
@@ -62,7 +65,8 @@ export const questions: QuestionType[] = [
     text: "A simple pendulum has a time period of 2s. What will be its time period on the moon where g is 1/6th of that on earth?",
     options: ["√6 s", "2√6 s", "4.9 s", "1.2 s"],
     correctAnswer: 1,
-    explanation: "Time period T = 2π√(l/g). As l is constant, T ∝ 1/√g. So new T = 2√6 s",
+    explanation:
+      "Time period T = 2π√(l/g). As l is constant, T ∝ 1/√g. So new T = 2√6 s",
   },
   {
     id: 6,
@@ -86,7 +90,8 @@ export const questions: QuestionType[] = [
     text: "What is the wavelength of the first line of the Balmer series for hydrogen atom?",
     options: ["656.3 nm", "486.1 nm", "434.0 nm", "410.2 nm"],
     correctAnswer: 0,
-    explanation: "The first line (n=3 to n=2) has wavelength 656.3 nm (Hα line)",
+    explanation:
+      "The first line (n=3 to n=2) has wavelength 656.3 nm (Hα line)",
   },
   {
     id: 9,
@@ -94,7 +99,8 @@ export const questions: QuestionType[] = [
     text: "A wire of resistance R is cut into two equal parts. The two parts are connected in parallel. What is the equivalent resistance?",
     options: ["R/4", "R/2", "R", "2R"],
     correctAnswer: 0,
-    explanation: "Each part has resistance R/2. In parallel, total resistance = (R/2 × R/2)/(R/2 + R/2) = R/4",
+    explanation:
+      "Each part has resistance R/2. In parallel, total resistance = (R/2 × R/2)/(R/2 + R/2) = R/4",
   },
   {
     id: 10,
@@ -111,7 +117,8 @@ export const questions: QuestionType[] = [
     text: "Which of the following is not an isotope of hydrogen?",
     options: ["Protium", "Deuterium", "Tritium", "Helium"],
     correctAnswer: 3,
-    explanation: "Helium is a different element with atomic number 2, while all isotopes of hydrogen have atomic number 1.",
+    explanation:
+      "Helium is a different element with atomic number 2, while all isotopes of hydrogen have atomic number 1.",
   },
   {
     id: 12,
@@ -127,7 +134,8 @@ export const questions: QuestionType[] = [
     text: "Which of the following is a strong electrolyte?",
     options: ["CH₃COOH", "NH₄OH", "HCl", "C₆H₁₂O₆"],
     correctAnswer: 2,
-    explanation: "HCl completely dissociates in water, making it a strong electrolyte.",
+    explanation:
+      "HCl completely dissociates in water, making it a strong electrolyte.",
   },
   {
     id: 14,
@@ -135,7 +143,8 @@ export const questions: QuestionType[] = [
     text: "What is the hybridization of carbon in benzene?",
     options: ["sp", "sp²", "sp³", "sp³d"],
     correctAnswer: 1,
-    explanation: "Carbon atoms in benzene are sp² hybridized, forming a planar hexagonal structure.",
+    explanation:
+      "Carbon atoms in benzene are sp² hybridized, forming a planar hexagonal structure.",
   },
   {
     id: 15,
@@ -143,7 +152,8 @@ export const questions: QuestionType[] = [
     text: "Which quantum number determines the shape of the orbital?",
     options: ["Principal", "Azimuthal", "Magnetic", "Spin"],
     correctAnswer: 1,
-    explanation: "The azimuthal quantum number (l) determines the shape of the orbital.",
+    explanation:
+      "The azimuthal quantum number (l) determines the shape of the orbital.",
   },
   {
     id: 16,
@@ -159,7 +169,8 @@ export const questions: QuestionType[] = [
     text: "Which of the following has the highest lattice energy?",
     options: ["NaCl", "MgO", "KCl", "CaO"],
     correctAnswer: 1,
-    explanation: "MgO has the highest lattice energy due to higher charge and smaller ionic radius.",
+    explanation:
+      "MgO has the highest lattice energy due to higher charge and smaller ionic radius.",
   },
   {
     id: 18,
@@ -175,7 +186,8 @@ export const questions: QuestionType[] = [
     text: "Which of the following is an example of a coordination compound?",
     options: ["NaCl", "[Cu(NH₃)₄]SO₄", "CH₄", "C₆H₆"],
     correctAnswer: 1,
-    explanation: "Copper tetraamine sulfate is a coordination compound with Cu²⁺ as central metal ion.",
+    explanation:
+      "Copper tetraamine sulfate is a coordination compound with Cu²⁺ as central metal ion.",
   },
   {
     id: 20,
@@ -183,7 +195,8 @@ export const questions: QuestionType[] = [
     text: "What is the bond order in O₂²⁻?",
     options: ["1", "1.5", "2", "2.5"],
     correctAnswer: 0,
-    explanation: "O₂²⁻ has 12 valence electrons, giving a bond order of (8-6)/2 = 1.",
+    explanation:
+      "O₂²⁻ has 12 valence electrons, giving a bond order of (8-6)/2 = 1.",
   },
 
   {
@@ -216,7 +229,8 @@ export const questions: QuestionType[] = [
     text: "What is the sum of the series 1 + 1/2 + 1/4 + 1/8 + ... to infinity?",
     options: ["1", "2", "3", "4"],
     correctAnswer: 1,
-    explanation: "This is a geometric series with a=1 and r=1/2. Sum = a/(1-r) = 1/(1-1/2) = 2",
+    explanation:
+      "This is a geometric series with a=1 and r=1/2. Sum = a/(1-r) = 1/(1-1/2) = 2",
   },
   {
     id: 25,
@@ -224,7 +238,8 @@ export const questions: QuestionType[] = [
     text: "If A and B are independent events with P(A) = 0.3 and P(B) = 0.4, then P(A∩B) is:",
     options: ["0.12", "0.7", "0.3", "0.4"],
     correctAnswer: 0,
-    explanation: "For independent events, P(A∩B) = P(A) × P(B) = 0.3 × 0.4 = 0.12",
+    explanation:
+      "For independent events, P(A∩B) = P(A) × P(B) = 0.3 × 0.4 = 0.12",
   },
   {
     id: 26,
@@ -238,9 +253,15 @@ export const questions: QuestionType[] = [
     id: 27,
     subject: "Mathematics",
     text: "What is the equation of a circle with center (2,3) and radius 4?",
-    options: ["(x-2)²+(y-3)²=16", "(x+2)²+(y+3)²=16", "(x-2)²+(y-3)²=4", "(x+2)²+(y+3)²=4"],
+    options: [
+      "(x-2)²+(y-3)²=16",
+      "(x+2)²+(y+3)²=16",
+      "(x-2)²+(y-3)²=4",
+      "(x+2)²+(y+3)²=4",
+    ],
     correctAnswer: 0,
-    explanation: "Standard form is (x-h)²+(y-k)²=r², where (h,k) is center and r is radius.",
+    explanation:
+      "Standard form is (x-h)²+(y-k)²=r², where (h,k) is center and r is radius.",
   },
   {
     id: 28,
@@ -256,7 +277,8 @@ export const questions: QuestionType[] = [
     text: "The domain of the function f(x) = √(x-1) is:",
     options: ["x ≥ 0", "x > 0", "x ≥ 1", "x > 1"],
     correctAnswer: 2,
-    explanation: "For square root, the expression inside must be non-negative: x-1 ≥ 0, so x ≥ 1",
+    explanation:
+      "For square root, the expression inside must be non-negative: x-1 ≥ 0, so x ≥ 1",
   },
   {
     id: 30,
@@ -264,23 +286,23 @@ export const questions: QuestionType[] = [
     text: "What is the value of lim(x→0) sin(x)/x?",
     options: ["0", "1", "∞", "undefined"],
     correctAnswer: 1,
-    explanation: "This is a famous limit that equals 1, can be proven using L'Hôpital's rule.",
-  }
-]
+    explanation:
+      "This is a famous limit that equals 1, can be proven using L'Hôpital's rule.",
+  },
+];
 
 export const tests: TestConfig[] = [
   {
     id: "test1",
     title: "Physics, Chemistry and Mathematics Test",
     description: "Combined test covering all subjects",
-    duration: 3600,
+    duration: 3600 * 3,
     totalMarks: 100,
     passingMarks: 35,
     subjects: ["Physics", "Chemistry", "Mathematics"],
     questionIds: Array.from({ length: 30 }, (_, i) => i + 1),
     scheduledFor: new Date("2024-03-20T10:00:00Z").getTime(),
     scheduledBy: "admin1",
-    assignedTo: ["student1"]
-  }
-]
-
+    assignedTo: ["student1"],
+  },
+];

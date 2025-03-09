@@ -1,89 +1,101 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import type { Subject, TestConfig } from "@/types"
-import { questions, users } from "@/data/mockData"
-import { generateSessionId } from "@/lib/utils"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import type { Subject, TestConfig } from "@/types";
+import { questions, users } from "@/data/mockData";
 
 export default function TestCreator() {
-  const router = useRouter()
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [duration, setDuration] = useState(180) 
-  const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([])
-  const [selectedQuestions, setSelectedQuestions] = useState<number[]>([])
-  const [scheduledDate, setScheduledDate] = useState("")
-  const [scheduledTime, setScheduledTime] = useState("")
-  const [selectedStudents, setSelectedStudents] = useState<string[]>([])
-  const [step, setStep] = useState(1)
+  const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [duration, setDuration] = useState(180);
+  const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
+  const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [step, setStep] = useState(1);
 
-  const students = users.filter((user) => user.role === "student")
+  const students = users.filter((user) => user.role === "student");
 
   const toggleSubject = (subject: Subject) => {
     if (selectedSubjects.includes(subject)) {
-      setSelectedSubjects(selectedSubjects.filter((s) => s !== subject))
+      setSelectedSubjects(selectedSubjects.filter((s) => s !== subject));
     } else {
-      setSelectedSubjects([...selectedSubjects, subject])
+      setSelectedSubjects([...selectedSubjects, subject]);
     }
-  }
+  };
 
   const toggleQuestion = (questionId: number) => {
     if (selectedQuestions.includes(questionId)) {
-      setSelectedQuestions(selectedQuestions.filter((id) => id !== questionId))
+      setSelectedQuestions(selectedQuestions.filter((id) => id !== questionId));
     } else {
-      setSelectedQuestions([...selectedQuestions, questionId])
+      setSelectedQuestions([...selectedQuestions, questionId]);
     }
-  }
+  };
 
   const toggleStudent = (studentId: string) => {
     if (selectedStudents.includes(studentId)) {
-      setSelectedStudents(selectedStudents.filter((id) => id !== studentId))
+      setSelectedStudents(selectedStudents.filter((id) => id !== studentId));
     } else {
-      setSelectedStudents([...selectedStudents, studentId])
+      setSelectedStudents([...selectedStudents, studentId]);
     }
-  }
+  };
 
   const selectAllQuestionsFromSubjects = () => {
-    const questionsFromSubjects = questions.filter((q) => selectedSubjects.includes(q.subject)).map((q) => q.id)
+    const questionsFromSubjects = questions
+      .filter((q) => selectedSubjects.includes(q.subject))
+      .map((q) => q.id);
 
-    setSelectedQuestions(questionsFromSubjects)
-  }
+    setSelectedQuestions(questionsFromSubjects);
+  };
 
   const selectAllStudents = () => {
-    setSelectedStudents(students.map((s) => s.id))
-  }
+    setSelectedStudents(students.map((s) => s.id));
+  };
 
   const createTest = () => {
-    if (!title || selectedQuestions.length === 0 || !scheduledDate || !scheduledTime || selectedStudents.length === 0) {
-      alert("Please fill in all required fields")
-      return
+    if (
+      !title ||
+      selectedQuestions.length === 0 ||
+      !scheduledDate ||
+      !scheduledTime ||
+      selectedStudents.length === 0
+    ) {
+      alert("Please fill in all required fields");
+      return;
+    }
+    function generateSessionId(): string {
+      return (
+        "session-" + Math.random().toString(36).substr(2, 9) + "-" + Date.now()
+      );
     }
 
-    const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime}`)
+    const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime}`);
 
     const newTest: TestConfig = {
       id: generateSessionId(),
       title,
       description,
-      duration: duration * 60, 
+      duration: duration * 60,
       subjects: selectedSubjects,
       questionIds: selectedQuestions,
       scheduledFor: scheduledDateTime.getTime(),
-      scheduledBy: "teacher1", 
+      scheduledBy: "teacher1",
       assignedTo: selectedStudents,
-      totalMarks: selectedQuestions.length * 4, 
-      passingMarks: Math.ceil(selectedQuestions.length * 4 * 0.33), 
-    }
+      totalMarks: selectedQuestions.length * 4,
+      passingMarks: Math.ceil(selectedQuestions.length * 4 * 0.33),
+    };
 
-    const storedTests = localStorage.getItem("tests")
-    const tests = storedTests ? JSON.parse(storedTests) : []
-    tests.push(newTest)
-    localStorage.setItem("tests", JSON.stringify(tests))
+    const storedTests = localStorage.getItem("tests");
+    const tests = storedTests ? JSON.parse(storedTests) : [];
+    tests.push(newTest);
+    localStorage.setItem("tests", JSON.stringify(tests));
 
-    router.push("/teacher/dashboard")
-  }
+    router.push("/teacher/dashboard");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -91,7 +103,9 @@ export default function TestCreator() {
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="bg-blue-900 text-white p-6">
             <h1 className="text-2xl font-bold">Create New Test</h1>
-            <p className="text-sm mt-2">Configure test settings, select questions, and assign to students</p>
+            <p className="text-sm mt-2">
+              Configure test settings, select questions, and assign to students
+            </p>
           </div>
 
           <div className="p-6">
@@ -109,7 +123,9 @@ export default function TestCreator() {
                 </div>
                 <div className="flex-1 h-1 mx-2 bg-gray-200">
                   <div
-                    className={`h-full ${step >= 2 ? "bg-blue-600" : "bg-gray-200"}`}
+                    className={`h-full ${
+                      step >= 2 ? "bg-blue-600" : "bg-gray-200"
+                    }`}
                     style={{ width: step >= 2 ? "100%" : "0%" }}
                   ></div>
                 </div>
@@ -125,7 +141,9 @@ export default function TestCreator() {
                 </div>
                 <div className="flex-1 h-1 mx-2 bg-gray-200">
                   <div
-                    className={`h-full ${step >= 3 ? "bg-blue-600" : "bg-gray-200"}`}
+                    className={`h-full ${
+                      step >= 3 ? "bg-blue-600" : "bg-gray-200"
+                    }`}
                     style={{ width: step >= 3 ? "100%" : "0%" }}
                   ></div>
                 </div>
@@ -144,10 +162,14 @@ export default function TestCreator() {
 
             {step === 1 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4 text-black">Test Information</h2>
+                <h2 className="text-xl font-semibold mb-4 text-black">
+                  Test Information
+                </h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Test Title*</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Test Title*
+                    </label>
                     <input
                       type="text"
                       value={title}
@@ -159,7 +181,9 @@ export default function TestCreator() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description
+                    </label>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
@@ -170,11 +194,15 @@ export default function TestCreator() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)*</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Duration (minutes)*
+                    </label>
                     <input
                       type="number"
                       value={duration}
-                      onChange={(e) => setDuration(Number.parseInt(e.target.value))}
+                      onChange={(e) =>
+                        setDuration(Number.parseInt(e.target.value))
+                      }
                       className="w-full p-2 border rounded-md text-black"
                       min={1}
                       required
@@ -182,9 +210,13 @@ export default function TestCreator() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Subjects*</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Subjects*
+                    </label>
                     <div className="flex flex-wrap gap-2">
-                      {(["Physics", "Chemistry", "Mathematics"] as Subject[]).map((subject) => (
+                      {(
+                        ["Physics", "Chemistry", "Mathematics"] as Subject[]
+                      ).map((subject) => (
                         <div
                           key={subject}
                           onClick={() => toggleSubject(subject)}
@@ -202,7 +234,9 @@ export default function TestCreator() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Scheduled Date*</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Scheduled Date*
+                      </label>
                       <input
                         type="date"
                         value={scheduledDate}
@@ -213,7 +247,9 @@ export default function TestCreator() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Scheduled Time*</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Scheduled Time*
+                      </label>
                       <input
                         type="time"
                         value={scheduledTime}
@@ -228,11 +264,16 @@ export default function TestCreator() {
                 <div className="mt-8 flex justify-end">
                   <Button
                     onClick={() => {
-                      if (!title || selectedSubjects.length === 0 || !scheduledDate || !scheduledTime) {
-                        alert("Please fill in all required fields")
-                        return
+                      if (
+                        !title ||
+                        selectedSubjects.length === 0 ||
+                        !scheduledDate ||
+                        !scheduledTime
+                      ) {
+                        alert("Please fill in all required fields");
+                        return;
                       }
-                      setStep(2)
+                      setStep(2);
                     }}
                     className="bg-blue-600 text-white hover:bg-blue-700"
                   >
@@ -243,13 +284,21 @@ export default function TestCreator() {
             )}
             {step === 2 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4 text-black">Select Questions</h2>
+                <h2 className="text-xl font-semibold mb-4 text-black">
+                  Select Questions
+                </h2>
 
                 <div className="mb-4 flex justify-between items-center">
                   <div>
-                    <span className="text-sm font-medium text-black">Selected: {selectedQuestions.length} questions</span>
+                    <span className="text-sm font-medium text-black">
+                      Selected: {selectedQuestions.length} questions
+                    </span>
                   </div>
-                  <Button variant="outline" size="sm" onClick={selectAllQuestionsFromSubjects}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={selectAllQuestionsFromSubjects}
+                  >
                     <span className="text-black">Select All from Subjects</span>
                   </Button>
                 </div>
@@ -258,7 +307,9 @@ export default function TestCreator() {
                   <div className="bg-gray-100 p-3 border-b flex items-center">
                     <div className="w-16 font-medium text-black">ID</div>
                     <div className="w-24 font-medium text-black">Subject</div>
-                    <div className="flex-1 font-medium text-black">Question</div>
+                    <div className="flex-1 font-medium text-black">
+                      Question
+                    </div>
                   </div>
 
                   <div className="max-h-96 overflow-y-auto">
@@ -268,13 +319,19 @@ export default function TestCreator() {
                         <div
                           key={question.id}
                           className={`p-3 border-b flex items-center hover:bg-gray-50 cursor-pointer ${
-                            selectedQuestions.includes(question.id) ? "bg-blue-50" : ""
+                            selectedQuestions.includes(question.id)
+                              ? "bg-blue-50"
+                              : ""
                           }`}
                           onClick={() => toggleQuestion(question.id)}
                         >
                           <div className="w-16 text-black">{question.id}</div>
-                          <div className="w-24 text-black">{question.subject}</div>
-                          <div className="flex-1 truncate text-black">{question.text}</div>
+                          <div className="w-24 text-black">
+                            {question.subject}
+                          </div>
+                          <div className="flex-1 truncate text-black">
+                            {question.text}
+                          </div>
                           <div className="w-6 h-6 rounded-md border flex items-center justify-center ml-2">
                             {selectedQuestions.includes(question.id) && (
                               <svg
@@ -297,16 +354,20 @@ export default function TestCreator() {
                 </div>
 
                 <div className="mt-8 flex justify-between">
-                  <Button variant="outline" onClick={() => setStep(1)} className="text-black hover:bg-gray-100">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep(1)}
+                    className="text-black hover:bg-gray-100"
+                  >
                     Back
                   </Button>
                   <Button
                     onClick={() => {
                       if (selectedQuestions.length === 0) {
-                        alert("Please select at least one question")
-                        return
+                        alert("Please select at least one question");
+                        return;
                       }
-                      setStep(3)
+                      setStep(3);
                     }}
                     className="bg-blue-600 text-white hover:bg-blue-700"
                   >
@@ -318,13 +379,21 @@ export default function TestCreator() {
 
             {step === 3 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4 text-black">Assign to Students</h2>
+                <h2 className="text-xl font-semibold mb-4 text-black">
+                  Assign to Students
+                </h2>
 
                 <div className="mb-4 flex justify-between items-center">
                   <div>
-                    <span className="text-sm font-medium text-black">Selected: {selectedStudents.length} students</span>
+                    <span className="text-sm font-medium text-black">
+                      Selected: {selectedStudents.length} students
+                    </span>
                   </div>
-                  <Button variant="outline" size="sm" onClick={selectAllStudents}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={selectAllStudents}
+                  >
                     <span className="text-black">Select All Students</span>
                   </Button>
                 </div>
@@ -341,13 +410,17 @@ export default function TestCreator() {
                       <div
                         key={student.id}
                         className={`p-3 border-b flex items-center hover:bg-gray-50 cursor-pointer ${
-                          selectedStudents.includes(student.id) ? "bg-blue-50" : ""
+                          selectedStudents.includes(student.id)
+                            ? "bg-blue-50"
+                            : ""
                         }`}
                         onClick={() => toggleStudent(student.id)}
                       >
                         <div className="w-16 text-black">{student.id}</div>
                         <div className="flex-1 text-black">{student.name}</div>
-                        <div className="w-48 truncate text-black">{student.email}</div>
+                        <div className="w-48 truncate text-black">
+                          {student.email}
+                        </div>
                         <div className="w-6 h-6 rounded-md border flex items-center justify-center ml-2">
                           {selectedStudents.includes(student.id) && (
                             <svg
@@ -370,10 +443,17 @@ export default function TestCreator() {
                 </div>
 
                 <div className="mt-8 flex justify-between">
-                  <Button variant="outline" onClick={() => setStep(2)} className="text-black hover:bg-gray-100">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep(2)}
+                    className="text-black hover:bg-gray-100"
+                  >
                     Back
                   </Button>
-                  <Button onClick={createTest} className="bg-blue-600 text-white hover:bg-blue-700">
+                  <Button
+                    onClick={createTest}
+                    className="bg-blue-600 text-white hover:bg-blue-700"
+                  >
                     Create Test
                   </Button>
                 </div>
@@ -383,6 +463,5 @@ export default function TestCreator() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-
